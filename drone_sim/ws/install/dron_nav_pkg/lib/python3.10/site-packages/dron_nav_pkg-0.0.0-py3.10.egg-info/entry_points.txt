@@ -1,0 +1,3 @@
+[console_scripts]
+dron_nav_pkg = dron_nav_pkg.dron_nav_pkg:main
+

@@ -1,0 +1,27 @@
+services:
+  px4:
+    build: .
+    image: px4-sim-custom:latest
+    container_name: ros2_px4_sim
+    stdin_open: true
+    tty: true
+    network_mode: host
+    privileged: true
+    environment:
+      - ROS_DOMAIN_ID=0
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,video,utility,display
+    volumes:
+      - .:/home/px4/ros2   # <<-- host ./ros2 persists to container /home/px4/ros2
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    devices:
+      - /dev/nvidiactl:/dev/nvidiactl
+      - /dev/nvidia-uvm:/dev/nvidia-uvm
+      - /dev/nvidia0:/dev/nvidia0
+    working_dir: /home/px4/ros2 
+    restart: unless-stopped
+    entrypoint: ["/entrypoint.sh"]
+    command: ["bash", "-lc", "tail -f /dev/null"]
+    runtime: nvidia

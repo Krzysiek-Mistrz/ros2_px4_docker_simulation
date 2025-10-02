@@ -1,0 +1,79 @@
+FROM osrf/ros:humble-desktop-jammy
+
+SHELL ["/bin/bash", "-c"]
+USER root
+WORKDIR /home/px4/ros2
+
+# avoid interactive prompts
+ARG DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND=${DEBIAN_FRONTEND}
+
+# ensure add-apt-repository is available, enable universe, then install packages
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends software-properties-common && \
+    add-apt-repository universe && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential cmake git wget unzip python3-pip \
+    libasio-dev libtinyxml2-dev libbullet-dev libssl-dev pkg-config \
+    python3-colcon-common-extensions \
+    python3-flake8 \
+    python3-pytest-cov \
+    python3-rosdep \
+    python3-setuptools \
+    python3-vcstool \
+    python3-colcon-clean \
+    python3-jinja2 \
+    python3-empy \
+    python3-toml \
+    python3-numpy \
+    python3-yaml \
+    python3-dev \
+    clang-format \
+    ros-humble-ament-cmake \
+    ros-humble-ament-cmake-auto \
+    ros-humble-ament-lint-auto \
+    ros-humble-ament-lint-cmake \
+    ros-humble-ros-base \
+    ros-dev-tools \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    protobuf-compiler \
+    nano \
+    locales \
+    sudo \
+    libgazebo-dev libeigen3-dev libopencv-dev \
+    libxslt-dev libxml2-dev \
+    mesa-utils libgl1 libgl1-mesa-glx libglu1-mesa \
+    libvulkan1 vulkan-tools \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN locale-gen en_US.UTF-8 && \
+    update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+ENV LANG=en_US.UTF-8 \
+    LC_ALL=en_US.UTF-8
+
+# ROS 2 Humble + colcon (some packages may already be installed above,
+# but keeping this for idempotency)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      ros-humble-desktop \
+      ros-humble-rmw-fastrtps-cpp \
+      python3-colcon-common-extensions \
+    && rm -rf /var/lib/apt/lists/*
+
+# Gazebo/rviz nvidia
+ENV QT_X11_NO_MITSHM=1
+ENV DISPLAY=:1
+
+RUN echo "source /opt/ros/humble/setup.bash" >> /root/.bashrc && \
+    echo "source /home/px4/ros2_ws/install/setup.bash" >> /root/.bashrc
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["bash"]
