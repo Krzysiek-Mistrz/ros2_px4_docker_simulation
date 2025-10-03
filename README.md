@@ -149,7 +149,7 @@ cd /home/px4/ros2/Micro-XRCE-DDS-Agent/build
 
 #### Terminal 2: Start QGroundControl (!IMPORTANT!)
 ```bash
-su px4user
+su px4
 # Start QGroundControl for monitoring and control
 qgroundcontrol
 # Or alternatively:
@@ -157,6 +157,7 @@ qgroundcontrol
 ```
 > *Note!*
 > *Without QGroundControl the PX4 doesn't start*
+> *U also have to switch up to normal user to use QGround control in docker*
 
 #### Terminal 3: Start PX4 Simulation
 ```bash
