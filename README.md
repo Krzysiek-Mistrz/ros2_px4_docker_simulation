@@ -9,6 +9,7 @@ This project creates a fully containerized drone simulation environment that inc
 - **ROS2 Humble** - Robot Operating System for communication
 - **Gazebo** - 3D simulation environment
 - **Micro-XRCE-DDS-Agent** - Communication bridge between PX4 and ROS2
+- **QGroundControl** - Ground control station for monitoring and control
 - **Custom Navigation Package** - Autonomous mission control
 
 ## Project Structure
@@ -37,7 +38,7 @@ hydrolab_2/
 └── README.md                           # This file
 ```
 
-## 🛠️ Prerequisites
+## Prerequisites
 
 ### System Requirements
 - **OS**: Ubuntu 20.04/22.04 or compatible Linux distribution
@@ -63,7 +64,7 @@ sudo systemctl restart docker
 sudo usermod -aG docker $USER
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Clone the Repository
 ```bash
@@ -71,17 +72,25 @@ git clone --recursive https://github.com/your-username/hydrolab_2.git
 cd hydrolab_2
 ```
 
-### 2. Setup X11 for GUI Applications
+### 2. Setup X11 for GUI Applications !IMPORTANT!
 ```bash
 # Allow Docker to access X11 display
-xhost +local:docker
+xhost +local:
 ```
 
 ### 3. Build and Start the Container
 ```bash
 cd drone_sim
-docker-compose up --build
+docker compose up --build
 ```
+
+### 3'. If you want only to Start the Container
+```bash
+cd drone_sim
+docker compose up
+```
+> *NOTE*
+> *closing is on ctrl+c*
 
 ### 4. Access the Container
 ```bash
@@ -110,7 +119,7 @@ colcon build
 source install/setup.bash
 ```
 
-## 🎮 Running the Simulation
+## Running the Simulation
 
 ### Method 1: Automated Mission Execution
 ```bash
@@ -124,6 +133,12 @@ This script will:
 2. Launch PX4 SITL with Gazebo
 3. Execute the autonomous mission
 
+**Note**: After starting the Micro-XRCE-DDS Agent, you should also start QGroundControl for monitoring:
+```bash
+# In a separate terminal inside the container
+qgroundcontrol
+```
+
 ### Method 2: Manual Step-by-Step Execution
 
 #### Terminal 1: Start Micro-XRCE-DDS Agent
@@ -132,17 +147,32 @@ cd /home/px4/ros2/Micro-XRCE-DDS-Agent/build
 ./MicroXRCEAgent udp4 -p 8888
 ```
 
-#### Terminal 2: Start PX4 Simulation
+#### Terminal 2: Start QGroundControl (!IMPORTANT!)
+```bash
+su px4user
+# Start QGroundControl for monitoring and control
+qgroundcontrol
+# Or alternatively:
+/opt/QGroundControl.AppImage
+```
+> *Note!*
+> *Without QGroundControl the PX4 doesn't start*
+
+#### Terminal 3: Start PX4 Simulation
 ```bash
 cd /home/px4/ros2/PX4-Autopilot
 make px4_sitl gz_x500
 ```
 
-#### Terminal 3: Run ROS2 Navigation Node
+#### Terminal 4: Run ROS2 Navigation Node
 ```bash
 cd /home/px4/ros2/ws
 source install/setup.bash
 python3 src/dron_nav_pkg/dron_nav_pkg/dron_nav_pkg.py
+
+or
+
+ros2 run dron_nav_pkg dron_nav_pkg
 ```
 
 ## Mission Description
@@ -285,8 +315,10 @@ ros2 topic echo /mission/phase
 
 ### Useful Commands
 ```bash
-# QGroundControl (if needed)
-./QGroundControl.AppImage
+# QGroundControl (recommended for monitoring)
+qgroundcontrol
+# Or directly:
+/opt/QGroundControl.AppImage
 
 # Monitor ROS2 topics
 ros2 topic list
