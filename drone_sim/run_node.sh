@@ -18,8 +18,8 @@ echo "Starting microxrce (background)..."
 sleep 2
 
 cd "${PX4_ROOT}"
-echo "Starting px4 (background)..."
-( make px4_sitl gz_x500 > /tmp/px4_sitl.log 2>&1 ) &
+echo "Starting px4..."
+( make px4_sitl gz_x500 > /tmp/px4_sitl.log 2>&1 )
 PX4_PID=$!
 echo "PX4 PID=${PX4_PID}"
 sleep 10

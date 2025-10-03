@@ -1,0 +1,30 @@
+# Exclude PX4-Autopilot directory from Docker build context
+# This ensures PX4 is cloned fresh inside the container
+PX4-Autopilot/
+PX4-Autopilot/*
+
+# Exclude other large directories that should be built inside container
+ws/build/
+ws/install/
+ws/log/
+
+# Exclude git directories
+.git/
+**/.git/
+
+# Exclude temporary files
+*.tmp
+*.log
+.DS_Store
+Thumbs.db
+
+# Exclude IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Exclude backup files
+*~
+*.bak
+*.backup

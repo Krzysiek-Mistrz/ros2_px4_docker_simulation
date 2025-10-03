@@ -2,6 +2,13 @@ FROM osrf/ros:humble-desktop-jammy
 
 SHELL ["/bin/bash", "-c"]
 USER root
+
+# Create px4 user with sudo privileges
+RUN useradd -m -s /bin/bash px4 && \
+    echo "px4:px4" | chpasswd && \
+    usermod -aG sudo px4 && \
+    echo "px4 ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
 WORKDIR /home/px4/ros2
 
 # avoid interactive prompts
@@ -47,8 +54,12 @@ RUN apt-get update && \
     sudo \
     libgazebo-dev libeigen3-dev libopencv-dev \
     libxslt-dev libxml2-dev \
-    mesa-utils libgl1 libgl1-mesa-glx libglu1-mesa \
+    mesa-utils libgl1 libgl1-mesa-glx libglu1-mesa libgl1-mesa-dri \
     libvulkan1 vulkan-tools \
+    x11-apps xauth \
+    libegl1-mesa libgles2-mesa \
+    libglx-mesa0 libglapi-mesa \
+    fuse libfuse2 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN locale-gen en_US.UTF-8 && \
@@ -68,6 +79,11 @@ RUN apt-get update && \
 # Gazebo/rviz nvidia
 ENV QT_X11_NO_MITSHM=1
 ENV DISPLAY=:1
+
+# Copy QGroundControl from host machine and install
+COPY ../QGroundControl.AppImage /opt/QGroundControl.AppImage
+RUN chmod +x /opt/QGroundControl.AppImage && \
+    ln -s /opt/QGroundControl.AppImage /usr/local/bin/qgroundcontrol
 
 RUN echo "source /opt/ros/humble/setup.bash" >> /root/.bashrc && \
     echo "source /home/px4/ros2_ws/install/setup.bash" >> /root/.bashrc
