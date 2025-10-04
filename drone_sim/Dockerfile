@@ -7,6 +7,7 @@ USER root
 RUN useradd -m -s /bin/bash px4 && \
     echo "px4:px4" | chpasswd && \
     usermod -aG sudo px4 && \
+    usermod -aG dialout px4 && \
     echo "px4 ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 WORKDIR /home/px4/ros2
@@ -68,7 +69,6 @@ RUN apt-get update && \
         alsa-utils \
         pipewire \
         pipewire-pulse \
-        pipewire-alsa \
         libpipewire-0.3-0 \
         libpipewire-0.3-dev \
         gstreamer1.0-plugins-base \
@@ -83,10 +83,7 @@ RUN apt-get update && \
         espeak \
         espeak-data \
         libspeechd-dev \
-        qt6-speech-dev \
-        libqt6texttospeech6 \
-        qtspeech5-speechd-plugin \
-        && rm -rf /var/lib/apt/lists/*
+        qtspeech5-speechd-plugin
 
 RUN locale-gen en_US.UTF-8 && \
     update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
