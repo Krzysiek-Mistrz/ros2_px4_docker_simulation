@@ -62,6 +62,32 @@ RUN apt-get update && \
     fuse libfuse2 \
     && rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update && \
+        apt-get install -y --no-install-recommends \
+        pulseaudio \
+        alsa-utils \
+        pipewire \
+        pipewire-pulse \
+        pipewire-alsa \
+        libpipewire-0.3-0 \
+        libpipewire-0.3-dev \
+        gstreamer1.0-plugins-base \
+        gstreamer1.0-plugins-good \
+        gstreamer1.0-plugins-bad \
+        gstreamer1.0-plugins-ugly \
+        gstreamer1.0-libav \
+        gstreamer1.0-tools \
+        libgstreamer1.0-0 \
+        libgstreamer-plugins-base1.0-0 \
+        speech-dispatcher \
+        espeak \
+        espeak-data \
+        libspeechd-dev \
+        qt6-speech-dev \
+        libqt6texttospeech6 \
+        qtspeech5-speechd-plugin \
+        && rm -rf /var/lib/apt/lists/*
+
 RUN locale-gen en_US.UTF-8 && \
     update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
 ENV LANG=en_US.UTF-8 \
@@ -81,7 +107,7 @@ ENV QT_X11_NO_MITSHM=1
 ENV DISPLAY=:1
 
 # Copy QGroundControl from host machine and install
-COPY ../QGroundControl.AppImage /opt/QGroundControl.AppImage
+COPY QGroundControl.AppImage /opt/QGroundControl.AppImage
 RUN chmod +x /opt/QGroundControl.AppImage && \
     ln -s /opt/QGroundControl.AppImage /usr/local/bin/qgroundcontrol
 
