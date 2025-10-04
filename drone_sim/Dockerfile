@@ -61,6 +61,7 @@ RUN apt-get update && \
     libegl1-mesa libgles2-mesa \
     libglx-mesa0 libglapi-mesa \
     fuse libfuse2 \
+    libxcb-xinerama0 libxkbcommon-x11-0 libxcb-cursor-dev -y \
     && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update && \
@@ -85,6 +86,8 @@ RUN apt-get update && \
         libspeechd-dev \
         qtspeech5-speechd-plugin
 
+RUN wget https://d176tv9ibo4jno.cloudfront.net/latest/QGroundControl-x86_64.AppImage
+
 RUN locale-gen en_US.UTF-8 && \
     update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
 ENV LANG=en_US.UTF-8 \
@@ -103,10 +106,9 @@ RUN apt-get update && \
 ENV QT_X11_NO_MITSHM=1
 ENV DISPLAY=:1
 
-# Copy QGroundControl from host machine and install
-COPY QGroundControl.AppImage /opt/QGroundControl.AppImage
-RUN chmod +x /opt/QGroundControl.AppImage && \
-    ln -s /opt/QGroundControl.AppImage /usr/local/bin/qgroundcontrol
+# Copy QGroundControl from host machine
+RUN chmod +x ./QGroundControl-x86_64.AppImage && \
+    ln -s ./QGroundControl-x86_64.AppImage /usr/local/bin/qgroundcontrol
 
 RUN echo "source /opt/ros/humble/setup.bash" >> /root/.bashrc && \
     echo "source /home/px4/ros2_ws/install/setup.bash" >> /root/.bashrc
