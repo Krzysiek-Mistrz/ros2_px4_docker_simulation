@@ -61,7 +61,7 @@ RUN apt-get update && \
     libegl1-mesa libgles2-mesa \
     libglx-mesa0 libglapi-mesa \
     fuse libfuse2 \
-    libxcb-xinerama0 libxkbcommon-x11-0 libxcb-cursor-dev -y \
+    libxcb-xinerama0 libxkbcommon-x11-0 libxcb-cursor-dev libxcb-cursor0 -y \
     && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update && \
@@ -111,10 +111,15 @@ RUN chmod +x ./QGroundControl-x86_64.AppImage && \
     ln -s ./QGroundControl-x86_64.AppImage /usr/local/bin/qgroundcontrol
 
 RUN echo "source /opt/ros/humble/setup.bash" >> /root/.bashrc && \
-    echo "source /home/px4/ros2_ws/install/setup.bash" >> /root/.bashrc
+    echo "source /home/px4/ros2_ws/install/setup.bash" >> /root/.bashrc && \
+    echo "source /opt/ros/humble/setup.bash" >> /home/px4/.bashrc && \
+    echo "source /home/px4/ros2_ws/install/setup.bash" >> /home/px4/.bashrc && \
+    chown -R px4:px4 /home/px4
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["bash"]
+
+
