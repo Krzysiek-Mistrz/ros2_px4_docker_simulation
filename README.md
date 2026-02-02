@@ -148,13 +148,27 @@ cd /home/px4/ros2/Micro-XRCE-DDS-Agent/build
 ```
 
 #### Terminal 2: Start QGroundControl (!IMPORTANT!)
+change to normal user:  
 ```bash
 su px4
-# Start QGroundControl for monitoring and control
-qgroundcontrol
-# Or alternatively:
-/opt/QGroundControl.AppImage
-```
+```  
+
+install all deps and qground control:  
+```bash
+qgroundcontrol_install.sh
+```  
+
+After that you should change permissions for pixhawk com port (please check your com port after connecting pixhawk to your device):  
+```bash
+sudo chmod 666 /dev/ttyACM0
+sudo chmod 666 /dev/ttyACM1
+```  
+
+Start QgroundControl:  
+```bash
+QGroundControl-x86_64.AppImage
+```  
+
 > *Note!*
 > *Without QGroundControl the PX4 doesn't start*
 > *U also have to switch up to normal user to use QGround control in docker*

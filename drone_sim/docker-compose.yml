@@ -22,13 +22,11 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - ${XAUTH:-/tmp/.docker.xauth}:/tmp/.docker.xauth:rw
       - /dev/shm:/dev/shm
-    devices:
-      - /dev/dri:/dev/dri
-      - /dev/bus/usb:/dev/bus/usb  # USB devices for Pixhawk
-      - /dev/ttyUSB0:/dev/ttyUSB0
-      - /dev/ttyUSB1:/dev/ttyUSB1
-      - /dev/ttyACM0:/dev/ttyACM0
-      - /dev/ttyACM1:/dev/ttyACM1
+      - /dev:/dev  # Mount all devices (simpler approach)
+    # Alternative: use device_cgroup_rules for dynamic device access
+    device_cgroup_rules:
+      - 'c 166:* rmw'  # Allow all ACM devices (ttyACM*)
+      - 'c 188:* rmw'  # Allow all USB serial devices (ttyUSB*)
     working_dir: /home/px4/ros2 
     restart: unless-stopped
     entrypoint: ["/entrypoint.sh"]
