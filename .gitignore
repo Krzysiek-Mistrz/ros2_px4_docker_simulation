@@ -3,3 +3,4 @@ install/
 log/
 QGroundControl-x86_64.AppImage
 *.AppImage
+AGENTS.md
