@@ -6,8 +6,8 @@ A comprehensive Docker-based simulation environment for autonomous drone develop
 
 This project creates a fully containerized drone simulation environment that includes:
 - **PX4 Autopilot v1.16.0** - Flight control software
-- **ROS2 Humble** - Robot Operating System for communication
-- **Gazebo** - 3D simulation environment
+- **ROS2 Humble / Jammy** - Robot Operating System for communication on main for humble and for RPI Jammy
+- **Gazebo** - 3D simulation environment -> on branch RPI_stable without any simulation env
 - **Micro-XRCE-DDS-Agent** - Communication bridge between PX4 and ROS2
 - **QGroundControl** - Ground control station for monitoring and control
 - **Custom Navigation Package** - Autonomous mission control
@@ -68,7 +68,7 @@ sudo usermod -aG docker $USER
 
 ### 1. Clone the Repository
 ```bash
-git clone --recursive https://github.com/your-username/hydrolab_2.git
+git clone --recursive https://github.com/Krzysiek-Mistrz/hydrolab_2.git
 cd hydrolab_2
 ```
 
@@ -98,7 +98,7 @@ docker compose up
 docker exec -it ros2_px4_sim bash
 ```
 
-### 5. Build the Simulation Environment
+### 5. Build the Simulation Environment (4 HOST AND RPI ENV)
 ```bash
 # Inside the container
 cd /home/px4/ros2
@@ -110,7 +110,9 @@ bash ./build_px4.sh
 cd Micro-XRCE-DDS-Agent
 mkdir -p build && cd build
 cmake ..
-make -j$(nproc)
+make
+sudo make install
+sudo ldconfig
 cd ../..
 
 # Build ROS2 workspace
@@ -141,13 +143,23 @@ qgroundcontrol
 
 ### Method 2: Manual Step-by-Step Execution
 
-#### Terminal 1: Start Micro-XRCE-DDS Agent
+#### Terminal 1: Start Micro-XRCE-DDS Agent (4 HOST AND RPI ENV)  
+for gazebo sim:  
 ```bash
 cd /home/px4/ros2/Micro-XRCE-DDS-Agent/build
-./MicroXRCEAgent udp4 -p 8888
-```
+MicroXRCEAgent udp4 -p 8888
+```  
 
-#### Terminal 2: Start QGroundControl (!IMPORTANT!)
+or for the real connection:  
+```bash
+MicroXRCEAgent serial --dev /dev/ttyAMA0 -b 921600
+```  
+of course u need to make sure that before actually doing so:  
+1) u setted correctly all permissions for ttyAMA0 or any port u connect to between your RPI and Pixhawk. 4 example: sudo chmod 666 /dev/ttyAMA0.  
+2) u enabled UXRCE_DDS_CFG and SER_TEL2_BAUD in ur pixhawk device 
+and also make sure that connection between ur RPI and pixhawk is right.  
+
+#### Terminal 2: Start QGroundControl (!IMPORTANT!) (4 HOST ENV)  
 change to normal user:  
 ```bash
 su px4
@@ -173,13 +185,13 @@ QGroundControl-x86_64.AppImage
 > *Without QGroundControl the PX4 doesn't start*
 > *U also have to switch up to normal user to use QGround control in docker*
 
-#### Terminal 3: Start PX4 Simulation
+#### Terminal 3: Start PX4 Simulation (4 HOST ENV)
 ```bash
 cd /home/px4/ros2/PX4-Autopilot
 make px4_sitl gz_x500
 ```
 
-#### Terminal 4: Run ROS2 Navigation Node
+#### Terminal 4: Run ROS2 Navigation Node (4 HOST ENV & RPI ENV)
 ```bash
 cd /home/px4/ros2/ws
 source install/setup.bash
@@ -233,8 +245,8 @@ export QT_X11_NO_MITSHM=1      # Qt compatibility
 
 ### Docker Compose Configuration
 The `docker-compose.yml` includes:
-- NVIDIA GPU support
-- X11 forwarding for Gazebo GUI
+- NVIDIA GPU support -> ONLY HOST ENV
+- X11 forwarding for Gazebo GUI -> ONLY HOST ENV
 - Host networking for ROS2 communication
 - Volume mounting for persistent development
 
