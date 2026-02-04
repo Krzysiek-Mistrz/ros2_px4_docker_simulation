@@ -4,3 +4,5 @@ log/
 QGroundControl-x86_64.AppImage
 *.AppImage
 AGENTS.md
+drone_sim/Micro-XRCE-DDS-Agent
+drone_sim/PX4-Autopilot
