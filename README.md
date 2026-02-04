@@ -127,14 +127,20 @@ sudo ldconfig
 cd ../..
 
 # Build ROS2 workspace
+bash ./build_ros_ws.sh
+
+or:  
+
 cd ws
+git clone https://github.com/PX4/px4_msgs.git
+git clone https://github.com/PX4/px4_ros_com.git
 colcon build
 source install/setup.bash
 ```
 
 ## Running the Simulation
 
-### Method 1: Automated Mission Execution
+### Method 1: Automated Mission Execution (4 SIM AND REAL ENV)
 ```bash
 # Inside the container
 cd /home/px4/ros2
@@ -187,7 +193,7 @@ sudo chmod 666 /dev/ttyACM0
 sudo chmod 666 /dev/ttyACM1
 ```  
 
-Start QgroundControl:  
+Start QgroundControl (4 HOST ENV):  
 ```bash
 QGroundControl-x86_64.AppImage
 ```  
@@ -206,9 +212,9 @@ make px4_sitl gz_x500
 ```bash
 cd /home/px4/ros2/ws
 source install/setup.bash
-python3 src/dron_nav_pkg/dron_nav_pkg/dron_nav_pkg.py
+python3 src//dron_nav_pkg/dron_nav_pkg.py
 
-or
+or:  
 
 ros2 run dron_nav_pkg dron_nav_pkg
 ```
