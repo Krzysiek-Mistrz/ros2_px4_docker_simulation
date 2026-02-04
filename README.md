@@ -98,7 +98,7 @@ docker compose up
 docker exec -it ros2_px4_sim bash
 ```
 
-### 5. Build the Simulation Environment (4 HOST AND RPI ENV)
+### 5. Build the Environment (4 HOST AND RPI ENV)
 ```bash
 # Inside the container
 cd /home/px4/ros2
@@ -106,7 +106,18 @@ cd /home/px4/ros2
 # Build PX4 (first time only)
 bash ./build_px4.sh
 
+or manually:  
+
+git clone --recursive -b v1.16.0 https://github.com/PX4/PX4-Autopilot.git ./PX4-Autopilot
+cd ./PX4-Autopilot
+bash ./Tools/setup/ubuntu.sh
+
 # Build Micro-XRCE-DDS Agent (first time only)
+bash ./build_microxrce.sh
+
+or manually:  
+
+git clone -b v3.0.1 https://github.com/eProsima/Micro-XRCE-DDS-Agent.git ./Micro-XRCE-DDS-Agent
 cd Micro-XRCE-DDS-Agent
 mkdir -p build && cd build
 cmake ..
