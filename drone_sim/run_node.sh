@@ -16,13 +16,12 @@ source "${ROS_WS}/install/setup.bash"
 set -u
 
 echo "Starting microxrce on /dev/ttyAMA0 (background)..."
-( /home/px4/ros2/Micro-XRCE-DDS-Agent/build/MicroXRCEAgent udp4 -p 8888 ) &
 sudo pkill MicroXRCEAgent || true
 sudo MicroXRCEAgent serial --dev /dev/ttyAMA0 -b 921600 &
 AGENT_PID=$!
 sleep 2
 
 echo "Starting node..."
-ros2 run dron_nav_pkg simple_flight_node
+ros2 run dron_nav_pkg dron_nav_pkg
 
 trap "kill $AGENT_PID" EXIT
