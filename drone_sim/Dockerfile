@@ -10,7 +10,7 @@ RUN useradd -m -s /bin/bash px4 && \
     usermod -aG dialout px4 && \
     echo "px4 ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-WORKDIR /home/px4/ros2
+WORKDIR /home/px4/ros2_ws
 
 # avoid interactive prompts
 ARG DEBIAN_FRONTEND=noninteractive
@@ -102,6 +102,14 @@ RUN apt-get update && \
       python3-colcon-common-extensions \
     && rm -rf /var/lib/apt/lists/*
 
+RUN pip3 install --no-cache-dir \
+    kconfiglib \
+    jinja2 \
+    empy==3.3.4 \
+    jsonschema \
+    pyros-genmsg \
+    setuptools==58.2.0
+    
 # Gazebo/rviz nvidia
 ENV QT_X11_NO_MITSHM=1
 ENV DISPLAY=:1

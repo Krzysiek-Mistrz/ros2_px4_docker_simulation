@@ -6,3 +6,5 @@ QGroundControl-x86_64.AppImage
 AGENTS.md
 drone_sim/Micro-XRCE-DDS-Agent
 drone_sim/PX4-Autopilot
+drone_sim/ws/src/px4_msgs
+drone_sim/ws/src/px4_ros_com

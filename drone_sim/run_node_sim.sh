@@ -27,4 +27,4 @@ echo "PX4 PID=${PX4_PID}"
 sleep 10
 
 echo "Starting node..."
-python3 "${ROS_WS}/src/dron_nav_pkg/dron_nav_pkg/dron_nav_pkg.py"
+ros2 run dron_nav_pkg dron_nav_pkg

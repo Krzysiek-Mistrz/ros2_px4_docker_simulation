@@ -4,7 +4,7 @@
 set -euo pipefail
 
 echo "Cloning and building Micro-XRCE-DDS-Agent..."
-if [ ! -d ./Micro-XRCE-DDS-Agent ]; then
+if [ -d ./Micro-XRCE-DDS-Agent ]; then
   rm -r ./Micro-XRCE-DDS-Agent
 fi
 
