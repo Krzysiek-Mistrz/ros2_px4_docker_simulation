@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
+
+
 set -euo pipefail
 
-PX4_ROOT=/home/px4/ros2/PX4-Autopilot
-ROS_WS=/home/px4/ros2/ws
+PX4_ROOT=$(pwd)/PX4-Autopilot
+ROS_WS=$(pwd)/ws
 
 export ROS_DOMAIN_ID=0
 

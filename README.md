@@ -1,4 +1,4 @@
-# HydroLab 2 - ROS2 PX4 Drone Simulation
+# ROS2 PX4 Drone Simulation 4 SIM and REAL ENV
 
 A comprehensive Docker-based simulation environment for autonomous drone development using ROS2 Humble, PX4 Autopilot, and Gazebo. This project provides a complete setup for developing and testing drone navigation algorithms in a containerized environment.
 
