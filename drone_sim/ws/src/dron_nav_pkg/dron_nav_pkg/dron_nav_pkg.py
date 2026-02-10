@@ -11,7 +11,7 @@ class SimpleFlightNode(Node):
     def __init__(self):
         super().__init__('simple_flight_node')
 
-        # === KONFIGURACJA QoS ===
+        # === QoS ===
         qos_profile = QoSProfile(
             reliability=QoSReliabilityPolicy.BEST_EFFORT,
             durability=QoSDurabilityPolicy.VOLATILE,
@@ -31,27 +31,23 @@ class SimpleFlightNode(Node):
         self.vehicle_local_position_subscriber_ = self.create_subscription(
             VehicleLocalPosition, '/fmu/out/vehicle_local_position', self.vehicle_local_position_callback, qos_profile)
         
-        # ZMIANA: Obsługa v1 (według Twojego topic list)
         self.vehicle_status_subscriber_ = self.create_subscription(
             VehicleStatus, '/fmu/out/vehicle_status_v1', self.vehicle_status_callback, qos_profile)
-            
-        # NOWOŚĆ: Nasłuchiwanie odpowiedzi (ACK) od PX4 - kluczowe do debugowania
+
         self.vehicle_command_ack_subscriber_ = self.create_subscription(
             VehicleCommandAck, '/fmu/out/vehicle_command_ack', self.vehicle_command_ack_callback, qos_profile)
 
-        # === ZMIENNE STANU ===
+        # === STATE VARS ===
         self.offboard_setpoint_counter_ = 0
         self.vehicle_local_position = VehicleLocalPosition()
         self.vehicle_status = VehicleStatus()
         self.start_time = None 
         self.flight_state = "INIT" 
-        self.position_valid = False # Czy mamy już odczyt pozycji?
-
-        # Timer (10Hz)
+        self.position_valid = False
         self.timer = self.create_timer(0.1, self.timer_callback)
-        self.get_logger().info("SimpleFlightNode ZAKTUALIZOWANY. Czekam na dane z PX4...")
+        self.get_logger().info("SimpleFlightNode Updated. Waiting 4 PX4...")
 
-    # === CALLBACKI ===
+    # === CALLBACKS ===
     def vehicle_local_position_callback(self, msg):
         self.vehicle_local_position = msg
         self.position_valid = True
@@ -60,24 +56,23 @@ class SimpleFlightNode(Node):
         self.vehicle_status = msg
 
     def vehicle_command_ack_callback(self, msg):
-        # Loguje tylko błędy lub odrzucenia komend
-        if msg.result != 0: # 0 = ACCEPTED
-            self.get_logger().error(f"KOMENDA ODRZUCONA! Cmd: {msg.command}, Result: {msg.result}")
+        if msg.result != 0:
+            self.get_logger().error(f"COMMANDE REJECTED! Cmd: {msg.command}, Result: {msg.result}")
         else:
-            self.get_logger().info(f"Komenda przyjęta (Cmd: {msg.command})")
+            self.get_logger().info(f"COMMAND ACCEPTED (Cmd: {msg.command})")
 
-    # === KOMENDY POMOCNICZE ===
+    # === HELPER METHODS ===
     def arm(self):
         self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_COMPONENT_ARM_DISARM, 1.0)
-        self.get_logger().info("Wysyłam: UZBRÓJ")
+        self.get_logger().info("Sending: ARM")
 
     def engage_offboard_mode(self):
         self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_DO_SET_MODE, 1.0, 6.0)
-        self.get_logger().info("Wysyłam: TRYB OFFBOARD")
+        self.get_logger().info("Sending: OFFBOARD MODE")
 
     def land(self):
         self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_NAV_LAND)
-        self.get_logger().info("Wysyłam: LĄDOWANIE")
+        self.get_logger().info("Sending: LANDING")
 
     def publish_vehicle_command(self, command, param1=0.0, param2=0.0):
         msg = VehicleCommand()
@@ -97,33 +92,28 @@ class SimpleFlightNode(Node):
         msg.yaw = 0.0 
         self.trajectory_setpoint_publisher_.publish(msg)
 
-    # === GŁÓWNA PĘTLA (LOGIKA) ===
+    # === MAIN LOGIC ===
     def timer_callback(self):
-        # 1. Heartbeat Offboard (musi iść zawsze)
         offboard_msg = OffboardControlMode()
         offboard_msg.position = True
         offboard_msg.velocity = False
         offboard_msg.acceleration = False
+        # offboard heartbeat 
         self.offboard_control_mode_publisher_.publish(offboard_msg)
 
-        # 2. Czekamy na "rozgrzanie" łącza i validację pozycji
         if self.offboard_setpoint_counter_ < 20:
             self.offboard_setpoint_counter_ += 1
             self.publish_position_setpoint(0.0, 0.0, 0.0)
             if self.offboard_setpoint_counter_ == 10:
-                self.get_logger().info("Rozgrzewanie połączenia...")
+                self.get_logger().info("CONNECTING...")
             return
 
         if not self.position_valid:
              if self.offboard_setpoint_counter_ % 20 == 0:
-                 self.get_logger().warn("Czekam na odczyt pozycji (VehicleLocalPosition)...")
+                 self.get_logger().warn("Waiting 4 position read (VehicleLocalPosition)...")
              return
 
-        # 3. Maszyna Stanów
-        if self.flight_state == "INIT":
-            # Próbuj przełączyć na Offboard i uzbroić
-            # Sprawdzamy NavState (14 = Offboard) i ArmingState (2 = Armed)
-            
+        if self.flight_state == "INIT":            
             is_offboard = (self.vehicle_status.nav_state == 14)
             is_armed = (self.vehicle_status.arming_state == 2)
 
@@ -132,21 +122,18 @@ class SimpleFlightNode(Node):
             
             if not is_armed:
                 self.arm()
-            
-            # Jeśli oba warunki spełnione - lecimy
+
             if is_offboard and is_armed:
                 self.start_time = time.time()
                 self.flight_state = "ASCEND"
-                self.get_logger().info("Dron GOTOWY! Zmieniam stan na ASCEND.")
+                self.get_logger().info("DRONE READY! Changing mode 2 ASCEND.")
 
         elif self.flight_state == "ASCEND":
-            # Wznoś się na 1m (z = -1.0)
             self.publish_position_setpoint(0.0, 0.0, -1.0)
             
             current_alt = -1.0 * self.vehicle_local_position.z
-            # Tolerancja 20cm
             if current_alt >= 0.8:
-                self.get_logger().info(f"Pułap osiągnięty ({current_alt:.2f}m). Zwis.")
+                self.get_logger().info(f"Set AGL Achieved ({current_alt:.2f}m)...")
                 self.start_time = time.time()
                 self.flight_state = "HOVER"
 
@@ -155,15 +142,14 @@ class SimpleFlightNode(Node):
             
             elapsed = time.time() - self.start_time
             if elapsed > 5.0:
-                self.get_logger().info("Koniec czasu. Lądowanie.")
+                self.get_logger().info("End of time. LANDING...")
                 self.flight_state = "LAND"
 
         elif self.flight_state == "LAND":
             self.land()
-            # Czekaj na rozbrojenie
             if self.vehicle_status.arming_state != 2:
                 self.flight_state = "DONE"
-                self.get_logger().info("Dron wylądował i rozbroił się.")
+                self.get_logger().info("Drone landed SUCESSFULLY. DISARMED.")
 
         elif self.flight_state == "DONE":
             pass

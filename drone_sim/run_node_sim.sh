@@ -15,6 +15,8 @@ source /opt/ros/humble/setup.bash
 source "${ROS_WS}/install/setup.bash"
 set -u
 
+# START QGROUNDCONTROL!!!
+
 echo "Starting microxrce (background)..."
 ( /home/px4/ros2/Micro-XRCE-DDS-Agent/build/MicroXRCEAgent udp4 -p 8888 ) &
 sleep 2
